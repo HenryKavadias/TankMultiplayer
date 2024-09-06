@@ -16,6 +16,8 @@ using UnityEngine.SceneManagement;
 
 public class HostGameManager : IDisposable
 {
+    private NetworkObject playerPrefab;
+
     private Allocation allocation;
     private string joinCode;
     private string lobbyId;
@@ -23,6 +25,12 @@ public class HostGameManager : IDisposable
 
     private const int MAXCONNECTIONS = 20;
     private const string GAMESCENENAME = "Game";
+
+    public HostGameManager(NetworkObject _playerPrefab)
+    {
+        playerPrefab = _playerPrefab;
+    }
+
     public async Task StartHostAsync()
     {
         // get allocations
@@ -82,7 +90,7 @@ public class HostGameManager : IDisposable
             return;
         }
 
-        NetworkServer = new NetworkServer(NetworkManager.Singleton);
+        NetworkServer = new NetworkServer(NetworkManager.Singleton, playerPrefab);
 
         UserData userData = new UserData()
         {
@@ -119,19 +127,18 @@ public class HostGameManager : IDisposable
 
     public async void Shutdown()
     {
+        if (string.IsNullOrEmpty(lobbyId)) { return; }
+
         HostSingleton.Instance.StopCoroutine(nameof(HeartbeatLobby));
-        if (!string.IsNullOrEmpty(lobbyId))
+        try
         {
-            try
-            {
-                await Lobbies.Instance.DeleteLobbyAsync(lobbyId);
-            }
-            catch (LobbyServiceException e)
-            {
-                Debug.Log(e);
-            }
-            lobbyId = string.Empty;
+            await Lobbies.Instance.DeleteLobbyAsync(lobbyId);
         }
+        catch (LobbyServiceException e)
+        {
+            Debug.Log(e);
+        }
+        lobbyId = string.Empty;
 
         NetworkServer.OnClientLeft -= HandleClientLeft;
 

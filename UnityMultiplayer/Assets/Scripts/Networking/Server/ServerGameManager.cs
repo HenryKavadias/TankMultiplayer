@@ -1,0 +1,141 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
+using Unity.Networking.Transport.Relay;
+using Unity.Services.Authentication;
+using Unity.Services.Lobbies;
+using Unity.Services.Lobbies.Models;
+using Unity.Services.Matchmaker.Models;
+using Unity.Services.Relay;
+using Unity.Services.Relay.Models;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class ServerGameManager : IDisposable
+{
+    private NetworkObject playerPrefab;
+
+    private string serverIP; 
+    private int serverPort;
+    private int queryPort;
+    private MatchplayBackfiller backfiller;
+    public NetworkServer NetworkServer { get; private set; }
+    private MultiplayAllocationService multiplayAllocationService;
+
+    public ServerGameManager(NetworkObject _playerPrefab, string _serverIP, int _serverPort, int _queryPort, NetworkManager _manager) 
+    {
+        playerPrefab = _playerPrefab;
+
+        serverIP = _serverIP;
+        serverPort = _serverPort;
+        queryPort = _queryPort;
+        NetworkServer = new NetworkServer(_manager, playerPrefab);
+        multiplayAllocationService = new MultiplayAllocationService();
+    }
+
+    public async Task StartGameServerAsync()
+    {
+        await multiplayAllocationService.BeginServerCheck();
+
+        try
+        {
+            MatchmakingResults matchmakerPayload = await GetMatchmakerPayload();
+
+            if (matchmakerPayload != null)
+            {
+                await StartBackfill(matchmakerPayload);
+                NetworkServer.OnUserJoined += UserJoined;
+                NetworkServer.OnUserLeft += UserLeft;
+            }
+            else 
+            {
+                Debug.LogWarning("Matchmaker payload time out");
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning(e);
+        }
+
+        if (!NetworkServer.OpenConnection(serverIP, serverPort))
+        {
+            Debug.LogWarning("NetworkSever did not start as expected.");
+            return;
+        }
+    }
+
+    private async Task<MatchmakingResults> GetMatchmakerPayload()
+    {
+        Task<MatchmakingResults> matchmakerPlayloadTask = 
+            multiplayAllocationService.SubscribeAndAwaitMatchmakerAllocation();
+
+        if (await Task.WhenAny(matchmakerPlayloadTask, Task.Delay(20000)) == matchmakerPlayloadTask) 
+        {
+            return matchmakerPlayloadTask.Result;
+        }
+
+        return null;
+    }
+
+    private async Task StartBackfill(MatchmakingResults payload)
+    {
+        backfiller = new MatchplayBackfiller($"{serverIP}:{serverPort}", 
+            payload.QueueName, 
+            payload.MatchProperties,
+            20);
+
+        if (backfiller.NeedsPlayers())
+        {
+            await backfiller.BeginBackfilling();
+        }
+    }
+
+    private void UserJoined(UserData user)
+    {
+        backfiller.AddPlayerToMatch(user);
+        multiplayAllocationService.AddPlayer();
+        if (!backfiller.NeedsPlayers() && backfiller.IsBackfilling)
+        {
+            _ = backfiller.StopBackfill();
+        }
+    }
+
+    private void UserLeft(UserData user)
+    {
+        int playerCount = backfiller.RemovePlayerFromMatch(user.userAuthId);
+        multiplayAllocationService.RemovePlayer();
+
+        if (playerCount <= 0)
+        {
+            // Close Server
+            CloseServer();
+            return;
+        }
+
+        if (backfiller.NeedsPlayers() && !backfiller.IsBackfilling)
+        {
+            _ = backfiller.BeginBackfilling();
+        }
+    }
+
+    private async void CloseServer()
+    {
+        await backfiller.StopBackfill();
+        Dispose();
+        Application.Quit(); // Closes the server side application
+    }
+
+    public void Dispose()
+    {
+        NetworkServer.OnUserJoined -= UserJoined;
+        NetworkServer.OnUserLeft -= UserLeft;
+
+        backfiller?.Dispose();
+        multiplayAllocationService?.Dispose();
+        NetworkServer?.Dispose();
+    }
+}

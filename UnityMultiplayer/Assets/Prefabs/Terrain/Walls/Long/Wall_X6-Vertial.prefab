@@ -52,6 +52,10 @@ PrefabInstance:
       propertyPath: m_Size.y
       value: 12
       objectReference: {fileID: 0}
+    - target: {fileID: 903340292183269952, guid: 2fb8cca3a5224d14a8c564d162a486fe, type: 3}
+      propertyPath: m_SortingLayerID
+      value: 1101800747
+      objectReference: {fileID: 0}
     - target: {fileID: 5556005956135935209, guid: 2fb8cca3a5224d14a8c564d162a486fe, type: 3}
       propertyPath: m_Size.y
       value: 12
