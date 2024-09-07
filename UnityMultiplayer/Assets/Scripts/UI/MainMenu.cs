@@ -19,7 +19,7 @@ public class MainMenu : MonoBehaviour
     private bool isMatchmaking;
     private bool isCancelling;
     private bool isBusy;
-    private float timeInQueue = 0.0f;
+    private float timeInQueue;
 
     private void Start()
     {
@@ -30,10 +30,7 @@ public class MainMenu : MonoBehaviour
         queueStatusText.text = string.Empty;
         queueTimerText.text = string.Empty;
 
-        if (disableMatchmaking) 
-        {
-            findMatchButtonText.text = "(disabled)";
-        }
+        if (disableMatchmaking) { findMatchButtonText.text = "(Disabled)"; }
     }
 
     private void Update()
@@ -50,11 +47,10 @@ public class MainMenu : MonoBehaviour
     {
         if (isCancelling || disableMatchmaking) { return; }
 
-        if (isMatchmaking) 
+        if (isMatchmaking)
         {
             queueStatusText.text = "Cancelling...";
             isCancelling = true;
-            // Cancel matchmaking
             await ClientSingleton.Instance.GameManager.CancelMatchmaking();
             isCancelling = false;
             isMatchmaking = false;
@@ -62,17 +58,17 @@ public class MainMenu : MonoBehaviour
             findMatchButtonText.text = "Find Match";
             queueStatusText.text = string.Empty;
             queueTimerText.text = string.Empty;
-            return; 
+            return;
         }
 
         if (isBusy) { return; }
 
-        // Start queue
         ClientSingleton.Instance.GameManager.MatchmakeAsync(OnMatchMade);
         findMatchButtonText.text = "Cancel";
         queueStatusText.text = "Searching...";
         timeInQueue = 0f;
         isMatchmaking = true;
+        isBusy = true;
     }
 
     private void OnMatchMade(MatchmakerPollingResult result)
@@ -94,29 +90,35 @@ public class MainMenu : MonoBehaviour
             case MatchmakerPollingResult.MatchAssignmentError:
                 queueStatusText.text = "MatchAssignmentError";
                 break;
-            default:
-                queueStatusText.text = "UnknownError";
-                break;
         }
     }
 
     public async void StartHost()
     {
         if (isBusy) { return; }
+
         isBusy = true;
+
         await HostSingleton.Instance.GameManager.StartHostAsync();
+
         isBusy = false;
     }
+
     public async void StartClient()
     {
         if (isBusy) { return; }
+
         isBusy = true;
+
         await ClientSingleton.Instance.GameManager.StartClientAsync(joinCodeField.text);
+
         isBusy = false;
     }
+
     public async void JoinAsync(Lobby lobby)
     {
         if (isBusy) { return; }
+
         isBusy = true;
 
         try

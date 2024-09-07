@@ -11,14 +11,15 @@ public class ApplicationController : MonoBehaviour
     [SerializeField] private HostSingleton hostPrefab;
     [SerializeField] private ServerSingleton serverPrefab;
     [SerializeField] private NetworkObject playerPrefab;
-    private const string GAMESCENENAME = "Game";
 
     private ApplicationData appData;
+
+    private const string GAMESCENENAME = "Game";
+
     private async void Start()
     {
         DontDestroyOnLoad(gameObject);
 
-        // Is this a dedicated server
         await LaunchInMode(SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null);
     }
 
@@ -51,9 +52,10 @@ public class ApplicationController : MonoBehaviour
 
     private IEnumerator LoadGameSceneAsync(ServerSingleton serverSingleton)
     {
-        AsyncOperation asyncOp = SceneManager.LoadSceneAsync(GAMESCENENAME);
-        while (!asyncOp.isDone) 
-        { 
+        AsyncOperation asyncOperation = SceneManager.LoadSceneAsync(GAMESCENENAME);
+
+        while (!asyncOperation.isDone)
+        {
             yield return null;
         }
 

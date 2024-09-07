@@ -51,9 +51,9 @@ public class ServerGameManager : IDisposable
                 NetworkServer.OnUserJoined += UserJoined;
                 NetworkServer.OnUserLeft += UserLeft;
             }
-            else 
+            else
             {
-                Debug.LogWarning("Matchmaker payload time out");
+                Debug.LogWarning("Matchmaker payload timed out");
             }
         }
         catch (Exception e)
@@ -63,19 +63,19 @@ public class ServerGameManager : IDisposable
 
         if (!NetworkServer.OpenConnection(serverIP, serverPort))
         {
-            Debug.LogWarning("NetworkSever did not start as expected.");
+            Debug.LogWarning("NetworkServer did not start as expected.");
             return;
         }
     }
 
     private async Task<MatchmakingResults> GetMatchmakerPayload()
     {
-        Task<MatchmakingResults> matchmakerPlayloadTask = 
+        Task<MatchmakingResults> matchmakerPayloadTask =
             multiplayAllocationService.SubscribeAndAwaitMatchmakerAllocation();
 
-        if (await Task.WhenAny(matchmakerPlayloadTask, Task.Delay(20000)) == matchmakerPlayloadTask) 
+        if (await Task.WhenAny(matchmakerPayloadTask, Task.Delay(20000)) == matchmakerPayloadTask)
         {
-            return matchmakerPlayloadTask.Result;
+            return matchmakerPayloadTask.Result;
         }
 
         return null;
@@ -83,8 +83,8 @@ public class ServerGameManager : IDisposable
 
     private async Task StartBackfill(MatchmakingResults payload)
     {
-        backfiller = new MatchplayBackfiller($"{serverIP}:{serverPort}", 
-            payload.QueueName, 
+        backfiller = new MatchplayBackfiller($"{serverIP}:{serverPort}",
+            payload.QueueName,
             payload.MatchProperties,
             20);
 

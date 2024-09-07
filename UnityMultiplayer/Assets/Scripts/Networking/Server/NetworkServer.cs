@@ -18,16 +18,16 @@ public class NetworkServer : IDisposable
 
     private Dictionary<ulong, string> clientIdToAuth = new Dictionary<ulong, string>();
     private Dictionary<string, UserData> authIdToUserData = new Dictionary<string, UserData>();
-    public NetworkServer(NetworkManager _networkManager, NetworkObject _playerPrefab)
+
+    public NetworkServer(NetworkManager networkManager, NetworkObject playerPrefab)
     {
-        networkManager = _networkManager;
-        playerPrefab = _playerPrefab;
+        this.networkManager = networkManager;
+        this.playerPrefab = playerPrefab;
 
         networkManager.ConnectionApprovalCallback += ApprovalCheck;
         networkManager.OnServerStarted += OnNetworkReady;
     }
-
-    // for server side support
+    // Server side
     public bool OpenConnection(string ip, int port)
     {
         UnityTransport transport = networkManager.gameObject.GetComponent<UnityTransport>();
@@ -36,20 +36,19 @@ public class NetworkServer : IDisposable
     }
 
     private void ApprovalCheck(
-        NetworkManager.ConnectionApprovalRequest request, 
+        NetworkManager.ConnectionApprovalRequest request,
         NetworkManager.ConnectionApprovalResponse response)
     {
-        // Get byte array and convert it to a JSON string
+        // Get byte array and convert to JSON string
         string payload = System.Text.Encoding.UTF8.GetString(request.Payload);
-        // Take that JSON string and convert it to a user data object
+        // Take JSON string and convert to user data
         UserData userData = JsonUtility.FromJson<UserData>(payload);
 
         clientIdToAuth[request.ClientNetworkId] = userData.userAuthId;
         authIdToUserData[userData.userAuthId] = userData;
-        
         OnUserJoined?.Invoke(userData);
 
-        // Can prevent connection if the player name doesn't meet the conditions
+        // Can prevent players from joining if their names don't me conditions
         _ = SpawnPlayerDelayed(request.ClientNetworkId);
 
         response.Approved = true;
@@ -73,7 +72,7 @@ public class NetworkServer : IDisposable
 
     private void OnClientDisconnect(ulong clientId)
     {
-        if (clientIdToAuth.TryGetValue(clientId, out string authId)) 
+        if (clientIdToAuth.TryGetValue(clientId, out string authId))
         {
             clientIdToAuth.Remove(clientId);
             OnUserLeft?.Invoke(authIdToUserData[authId]);
@@ -84,20 +83,24 @@ public class NetworkServer : IDisposable
 
     public UserData GetUserDataByClientId(ulong clientId)
     {
-        if (clientIdToAuth.TryGetValue(clientId,out string authId))
+        if (clientIdToAuth.TryGetValue(clientId, out string authId))
         {
             if (authIdToUserData.TryGetValue(authId, out UserData data))
             {
                 return data;
             }
+
+            return null;
         }
+
         return null;
     }
 
     public void Dispose()
     {
         if (networkManager == null) { return; }
-        networkManager.ConnectionApprovalCallback -= ApprovalCheck;     
+
+        networkManager.ConnectionApprovalCallback -= ApprovalCheck;
         networkManager.OnClientDisconnectCallback -= OnClientDisconnect;
         networkManager.OnServerStarted -= OnNetworkReady;
 

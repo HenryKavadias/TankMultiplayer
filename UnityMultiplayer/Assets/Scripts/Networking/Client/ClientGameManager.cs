@@ -69,7 +69,7 @@ public class ClientGameManager : IDisposable
             Debug.Log(e);
             return;
         }
-        
+
         UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
 
         RelayServerData relayServerData = new RelayServerData(allocation, "dtls");
@@ -100,9 +100,8 @@ public class ClientGameManager : IDisposable
     {
         MatchmakingResult matchmakingResult = await matchmaker.Matchmake(userData);
 
-        if (matchmakingResult.result == MatchmakerPollingResult.Success) 
-        { 
-            // Connect to server
+        if (matchmakingResult.result == MatchmakerPollingResult.Success)
+        {
             StartClient(matchmakingResult.ip, matchmakingResult.port);
         }
 
@@ -118,9 +117,9 @@ public class ClientGameManager : IDisposable
     {
         networkClient.Disconnect();
     }
+
     public void Dispose()
     {
         networkClient?.Dispose();
     }
-
 }

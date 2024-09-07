@@ -16,39 +16,27 @@ using UnityEngine.SceneManagement;
 
 public class HostGameManager : IDisposable
 {
+    private Allocation allocation;
     private NetworkObject playerPrefab;
 
-    private Allocation allocation;
-    private string joinCode;
     private string lobbyId;
+
+    public string JoinCode { get; private set; }
     public NetworkServer NetworkServer { get; private set; }
 
     private const int MAXCONNECTIONS = 20;
     private const string GAMESCENENAME = "Game";
 
-    public HostGameManager(NetworkObject _playerPrefab)
+    public HostGameManager(NetworkObject playerPrefab)
     {
-        playerPrefab = _playerPrefab;
+        this.playerPrefab = playerPrefab;
     }
 
-    public async Task StartHostAsync()
+    public async Task StartHostAsync(bool isPrivate = false)
     {
-        // get allocations
         try
         {
             allocation = await Relay.Instance.CreateAllocationAsync(MAXCONNECTIONS);
-        }
-        catch(Exception e) 
-        {
-            Debug.Log(e);   
-            return;
-        }
-
-        // get join code
-        try
-        {
-            joinCode = await Relay.Instance.GetJoinCodeAsync(allocation.AllocationId);
-            Debug.Log(joinCode);
         }
         catch (Exception e)
         {
@@ -56,33 +44,42 @@ public class HostGameManager : IDisposable
             return;
         }
 
-        // setup new scene as host
+        try
+        {
+            JoinCode = await Relay.Instance.GetJoinCodeAsync(allocation.AllocationId);
+            Debug.Log(JoinCode);
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e);
+            return;
+        }
+
         UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
 
         RelayServerData relayServerData = new RelayServerData(allocation, "dtls");
         transport.SetRelayServerData(relayServerData);
 
-        // Create a lobby
         try
         {
             CreateLobbyOptions lobbyOptions = new CreateLobbyOptions();
-            lobbyOptions.IsPrivate = false; // Can be controlled with a UI button
+            lobbyOptions.IsPrivate = isPrivate;
             lobbyOptions.Data = new Dictionary<string, DataObject>()
             {
                 {
                     "JoinCode", new DataObject(
-                        visibility: DataObject.VisibilityOptions.Member, 
-                        value: joinCode)
+                        visibility: DataObject.VisibilityOptions.Member,
+                        value: JoinCode
+                    )
                 }
             };
-            // Could prevent making a lobby if the host player doesn't have a name
             string playerName = PlayerPrefs.GetString(NameSelector.PLAYERNAMEKEY, "Unknown");
             Lobby lobby = await Lobbies.Instance.CreateLobbyAsync(
                 $"{playerName}'s Lobby", MAXCONNECTIONS, lobbyOptions);
 
             lobbyId = lobby.Id;
 
-            HostSingleton.Instance.StartCoroutine(HeartbeatLobby(15));
+            HostSingleton.Instance.StartCoroutine(HearbeatLobby(15));
         }
         catch (LobbyServiceException e)
         {
@@ -92,12 +89,11 @@ public class HostGameManager : IDisposable
 
         NetworkServer = new NetworkServer(NetworkManager.Singleton, playerPrefab);
 
-        UserData userData = new UserData()
+        UserData userData = new UserData
         {
             userName = PlayerPrefs.GetString(NameSelector.PLAYERNAMEKEY, "Missing Name"),
             userAuthId = AuthenticationService.Instance.PlayerId
         };
-
         string payload = JsonUtility.ToJson(userData);
         byte[] payloadBytes = Encoding.UTF8.GetBytes(payload);
 
@@ -110,10 +106,10 @@ public class HostGameManager : IDisposable
         NetworkManager.Singleton.SceneManager.LoadScene(GAMESCENENAME, LoadSceneMode.Single);
     }
 
-    private IEnumerator HeartbeatLobby(float seconds)
+    private IEnumerator HearbeatLobby(float waitTimeSeconds)
     {
-        WaitForSecondsRealtime delay = new WaitForSecondsRealtime(seconds);
-        while (true) 
+        WaitForSecondsRealtime delay = new WaitForSecondsRealtime(waitTimeSeconds);
+        while (true)
         {
             Lobbies.Instance.SendHeartbeatPingAsync(lobbyId);
             yield return delay;
@@ -129,7 +125,8 @@ public class HostGameManager : IDisposable
     {
         if (string.IsNullOrEmpty(lobbyId)) { return; }
 
-        HostSingleton.Instance.StopCoroutine(nameof(HeartbeatLobby));
+        HostSingleton.Instance.StopCoroutine(nameof(HearbeatLobby));
+
         try
         {
             await Lobbies.Instance.DeleteLobbyAsync(lobbyId);
@@ -138,6 +135,7 @@ public class HostGameManager : IDisposable
         {
             Debug.Log(e);
         }
+
         lobbyId = string.Empty;
 
         NetworkServer.OnClientLeft -= HandleClientLeft;
@@ -151,7 +149,7 @@ public class HostGameManager : IDisposable
         {
             await LobbyService.Instance.RemovePlayerAsync(lobbyId, authId);
         }
-        catch (LobbyServiceException e) 
+        catch (LobbyServiceException e)
         {
             Debug.Log(e);
         }

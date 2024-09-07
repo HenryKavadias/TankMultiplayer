@@ -1,6 +1,5 @@
 using System;
 
-
 public enum Map
 {
     Default
