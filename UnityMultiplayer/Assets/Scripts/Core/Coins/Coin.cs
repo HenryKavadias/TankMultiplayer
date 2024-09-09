@@ -8,7 +8,7 @@ public abstract class Coin : NetworkBehaviour
     [SerializeField] private SpriteRenderer spriteRenderer;
 
     protected int coinValue = 10;
-    protected bool isCollected;
+    protected bool alreadyCollected;
 
     public abstract int Collect();
 

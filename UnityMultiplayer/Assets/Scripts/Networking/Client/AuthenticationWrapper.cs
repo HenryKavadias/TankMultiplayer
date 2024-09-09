@@ -30,8 +30,7 @@ public static class AuthenticationWrapper
 
     private static async Task<AuthState> Authenticating()
     {
-        while(AuthState == AuthState.Authenticating || 
-            AuthState == AuthState.NotAuthenticated)
+        while (AuthState == AuthState.Authenticating || AuthState == AuthState.NotAuthenticated)
         {
             await Task.Delay(200);
         }
@@ -56,12 +55,12 @@ public static class AuthenticationWrapper
                     break;
                 }
             }
-            catch(AuthenticationException authException) // Authentication failure
+            catch (AuthenticationException authException)
             {
                 Debug.LogError(authException);
                 AuthState = AuthState.Error;
             }
-            catch (RequestFailedException requestException) // Connection failure
+            catch (RequestFailedException requestException)
             {
                 Debug.LogError(requestException);
                 AuthState = AuthState.Error;
@@ -73,10 +72,11 @@ public static class AuthenticationWrapper
 
         if (AuthState != AuthState.Authenticated)
         {
-            Debug.LogWarning($"Player wasn't signed in successfully after {retries} retries.");
+            Debug.LogWarning($"Player was not signed in successfully after {retries} retries");
             AuthState = AuthState.TimeOut;
         }
     }
+
 }
 
 public enum AuthState

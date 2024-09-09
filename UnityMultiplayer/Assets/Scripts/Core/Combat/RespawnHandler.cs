@@ -33,17 +33,17 @@ public class RespawnHandler : NetworkBehaviour
 
     private void HandlePlayerSpawned(TankPlayer player)
     {
-        player.health.OnDie += (health) => HandlePlayerDie(player);
+        player.Health.OnDie += (health) => HandlePlayerDie(player);
     }
 
     private void HandlePlayerDespawned(TankPlayer player)
     {
-        player.health.OnDie -= (health) => HandlePlayerDie(player);
+        player.Health.OnDie -= (health) => HandlePlayerDie(player);
     }
 
     private void HandlePlayerDie(TankPlayer player)
     {
-        int keptCoins = (int)(player.wallet.totalCoins.Value * (keptCoinPercentage / 100f));
+        int keptCoins = (int)(player.Wallet.TotalCoins.Value * (keptCoinPercentage / 100f));
 
         Destroy(player.gameObject);
 
@@ -59,6 +59,6 @@ public class RespawnHandler : NetworkBehaviour
         
         playerInstance.NetworkObject.SpawnAsPlayerObject(ownerClientId);
         // Only modify networkObjects after they have spawned
-        playerInstance.wallet.totalCoins.Value += keptCoins;
+        playerInstance.Wallet.TotalCoins.Value += keptCoins;
     }
 }

@@ -32,7 +32,7 @@ public class HostGameManager : IDisposable
         this.playerPrefab = playerPrefab;
     }
 
-    public async Task StartHostAsync(bool isPrivate = false)
+    public async Task StartHostAsync(bool isPrivate)
     {
         try
         {
@@ -154,4 +154,5 @@ public class HostGameManager : IDisposable
             Debug.Log(e);
         }
     }
+
 }

@@ -19,7 +19,8 @@ public class ClientNetworkTransform : NetworkTransform
         {
             if (NetworkManager.IsConnectedClient || NetworkManager.IsListening) 
             {
-                if (CanCommitToTransform) { 
+                if (CanCommitToTransform) 
+                { 
                     TryCommitTransformToServer(transform, NetworkManager.LocalTime.Time);
                 }
             }

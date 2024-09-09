@@ -17,26 +17,23 @@ using UnityEngine.SceneManagement;
 
 public class ServerGameManager : IDisposable
 {
-    private NetworkObject playerPrefab;
-
-    private string serverIP; 
+    private string serverIP;
     private int serverPort;
     private int queryPort;
     private MatchplayBackfiller backfiller;
-
     private MultiplayAllocationService multiplayAllocationService;
 
     private Dictionary<string, int> teamIdToTeamIndex = new Dictionary<string, int>();
+
     public NetworkServer NetworkServer { get; private set; }
 
-    public ServerGameManager(NetworkObject _playerPrefab, string _serverIP, int _serverPort, int _queryPort, NetworkManager _manager) 
+    public ServerGameManager(string serverIP, int serverPort,
+        int queryPort, NetworkManager manager, NetworkObject playerPrefab)
     {
-        playerPrefab = _playerPrefab;
-
-        serverIP = _serverIP;
-        serverPort = _serverPort;
-        queryPort = _queryPort;
-        NetworkServer = new NetworkServer(_manager, playerPrefab);
+        this.serverIP = serverIP;
+        this.serverPort = serverPort;
+        this.queryPort = queryPort;
+        NetworkServer = new NetworkServer(manager, playerPrefab);
         multiplayAllocationService = new MultiplayAllocationService();
     }
 
@@ -105,6 +102,7 @@ public class ServerGameManager : IDisposable
             teamIndex = teamIdToTeamIndex.Count;
             teamIdToTeamIndex.Add(team.TeamId, teamIndex);
         }
+
         user.teamIndex = teamIndex;
 
         multiplayAllocationService.AddPlayer();
@@ -121,7 +119,6 @@ public class ServerGameManager : IDisposable
 
         if (playerCount <= 0)
         {
-            // Close Server
             CloseServer();
             return;
         }
@@ -136,7 +133,7 @@ public class ServerGameManager : IDisposable
     {
         await backfiller.StopBackfill();
         Dispose();
-        Application.Quit(); // Closes the server side application
+        Application.Quit();
     }
 
     public void Dispose()
@@ -148,4 +145,5 @@ public class ServerGameManager : IDisposable
         multiplayAllocationService?.Dispose();
         NetworkServer?.Dispose();
     }
+
 }

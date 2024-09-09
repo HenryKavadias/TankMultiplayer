@@ -6,9 +6,10 @@ using UnityEngine;
 
 public class HostSingleton : MonoBehaviour
 {
+    private static HostSingleton instance;
+
     public HostGameManager GameManager { get; private set; }
 
-    private static HostSingleton instance;
     public static HostSingleton Instance
     {
         get
@@ -16,14 +17,16 @@ public class HostSingleton : MonoBehaviour
             if (instance != null) { return instance; }
 
             instance = FindObjectOfType<HostSingleton>();
-            if (instance == null) 
+
+            if (instance == null)
             {
-                Debug.LogWarning("No HostSingleton in the scene!");
-                return null; 
+                return null;
             }
+
             return instance;
         }
     }
+
     private void Start()
     {
         DontDestroyOnLoad(gameObject);
@@ -38,4 +41,5 @@ public class HostSingleton : MonoBehaviour
     {
         GameManager?.Dispose();
     }
+
 }

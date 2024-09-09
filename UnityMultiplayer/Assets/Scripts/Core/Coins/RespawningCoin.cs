@@ -23,13 +23,13 @@ public class RespawningCoin : Coin
     {
         if (!IsServer)
         {
-            Show(false); 
+            Show(false);
             return 0;
         }
 
-        if (isCollected) { return 0; }
+        if (alreadyCollected) { return 0; }
 
-        isCollected = true;
+        alreadyCollected = true;
 
         OnCollected?.Invoke(this);
 
@@ -38,6 +38,7 @@ public class RespawningCoin : Coin
 
     public void Reset()
     {
-        isCollected = false;
+        alreadyCollected = false;
     }
 }
+

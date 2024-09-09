@@ -19,7 +19,7 @@ public class NameSelector : MonoBehaviour
         if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
-            return; 
+            return;
         }
 
         nameField.text = PlayerPrefs.GetString(PLAYERNAMEKEY, string.Empty);
@@ -28,7 +28,7 @@ public class NameSelector : MonoBehaviour
 
     public void HandleNameChanged()
     {
-        connectButton.interactable = 
+        connectButton.interactable =
             nameField.text.Length >= minNameLength &&
             nameField.text.Length <= maxNameLength;
     }
@@ -39,4 +39,5 @@ public class NameSelector : MonoBehaviour
 
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
+
 }

@@ -56,13 +56,12 @@ public class CoinSpawner : NetworkBehaviour
             x = Random.Range(xSpawnRange.x, xSpawnRange.y);
             y = Random.Range(ySpawnRange.x, ySpawnRange.y);
             Vector2 spawnPoint = new Vector2(x, y);
-            int numColliders = Physics2D.OverlapCircleNonAlloc(
-                spawnPoint, coinRadius, coinBuffer, layerMask);
+            int numColliders = Physics2D.OverlapCircleNonAlloc(spawnPoint, coinRadius, coinBuffer, layerMask);
             if (numColliders == 0)
             {
                 return spawnPoint;
             }
         }
     }
-
 }
+

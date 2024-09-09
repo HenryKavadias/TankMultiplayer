@@ -29,14 +29,14 @@ public class Leaderboard : NetworkBehaviour
     {
         if (IsClient)
         {
-            if (ClientSingleton.Instance.GameManager.UserData.userGamePreferences.gameQueue 
+            if (ClientSingleton.Instance.GameManager.UserData.userGamePreferences.gameQueue
                 == GameQueue.Team)
             {
                 teamLeaderboardBackground.SetActive(true);
 
                 for (int i = 0; i < teamNames.Length; i++)
                 {
-                    LeaderboardEntityDisplay teamLeaderboardEntity = 
+                    LeaderboardEntityDisplay teamLeaderboardEntity =
                         Instantiate(leaderboardEntityPrefab, teamLeaderboardEntityHolder);
 
                     teamLeaderboardEntity.Initialise(i, teamNames[i], 0);
@@ -61,7 +61,6 @@ public class Leaderboard : NetworkBehaviour
 
         if (IsServer)
         {
-            // Spawn player if they join game before event handlers are assigned
             TankPlayer[] players = FindObjectsByType<TankPlayer>(FindObjectsSortMode.None);
             foreach (TankPlayer player in players)
             {
@@ -94,13 +93,10 @@ public class Leaderboard : NetworkBehaviour
         switch (changeEvent.Type)
         {
             case NetworkListEvent<LeaderboardEntityState>.EventType.Add:
-                // Prevents duplicate entities on the leaderboard
                 if (!entityDisplays.Any(x => x.ClientId == changeEvent.Value.ClientId))
                 {
-                    // Create...
                     LeaderboardEntityDisplay leaderboardEntity =
                         Instantiate(leaderboardEntityPrefab, leaderboardEntityHolder);
-                    // Set data..
                     leaderboardEntity.Initialise(
                         changeEvent.Value.ClientId,
                         changeEvent.Value.PlayerName,
@@ -109,7 +105,6 @@ public class Leaderboard : NetworkBehaviour
                     {
                         leaderboardEntity.SetColour(ownerColour);
                     }
-                    // add entity to list
                     entityDisplays.Add(leaderboardEntity);
                 }
                 break;
@@ -132,17 +127,16 @@ public class Leaderboard : NetworkBehaviour
                 }
                 break;
         }
-        // Sort largest to smallest
+
         entityDisplays.Sort((x, y) => y.Coins.CompareTo(x.Coins));
-        // Update text of entities
+
         for (int i = 0; i < entityDisplays.Count; i++)
         {
             entityDisplays[i].transform.SetSiblingIndex(i);
             entityDisplays[i].UpdateText();
-            // only display in the top (entitiesToDisplay)
             entityDisplays[i].gameObject.SetActive(i <= entitiesToDisplay - 1);
         }
-        // Display at bottom if we aren't in top (entitiesToDisplay)
+
         LeaderboardEntityDisplay myDisplay =
             entityDisplays.FirstOrDefault(x => x.ClientId == NetworkManager.Singleton.LocalClientId);
 
@@ -192,7 +186,7 @@ public class Leaderboard : NetworkBehaviour
             Coins = 0
         });
 
-        player.wallet.totalCoins.OnValueChanged += (oldCoins, newCoins) =>
+        player.Wallet.TotalCoins.OnValueChanged += (oldCoins, newCoins) =>
             HandleCoinsChanged(player.OwnerClientId, newCoins);
     }
 
@@ -206,7 +200,7 @@ public class Leaderboard : NetworkBehaviour
             break;
         }
 
-        player.wallet.totalCoins.OnValueChanged -= (oldCoins, newCoins) =>
+        player.Wallet.TotalCoins.OnValueChanged -= (oldCoins, newCoins) =>
             HandleCoinsChanged(player.OwnerClientId, newCoins);
     }
 
@@ -228,3 +222,4 @@ public class Leaderboard : NetworkBehaviour
         }
     }
 }
+

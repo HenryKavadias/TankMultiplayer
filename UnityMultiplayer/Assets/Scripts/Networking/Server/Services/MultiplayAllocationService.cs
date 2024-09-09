@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using Unity.Services.Matchmaker.Models;
 using Unity.Services.Multiplay;
 using UnityEngine;
-
 public class MultiplayAllocationService : IDisposable
 {
     private IMultiplayService multiplayService;

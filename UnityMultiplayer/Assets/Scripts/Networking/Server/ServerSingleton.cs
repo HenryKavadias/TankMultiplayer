@@ -34,11 +34,11 @@ public class ServerSingleton : MonoBehaviour
     {
         await UnityServices.InitializeAsync();
         GameManager = new ServerGameManager(
-            playerPrefab,
             ApplicationData.IP(),
             ApplicationData.Port(),
             ApplicationData.QPort(),
-            NetworkManager.Singleton
+            NetworkManager.Singleton,
+            playerPrefab
         );
     }
 

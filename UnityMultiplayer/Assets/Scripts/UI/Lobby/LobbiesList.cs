@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
-
 public class LobbiesList : MonoBehaviour
 {
     [SerializeField] private MainMenu mainMenu;
     [SerializeField] private Transform lobbyItemParent;
     [SerializeField] private LobbyItem lobbyItemPrefab;
 
-    private bool isRefreshing = false;
+    private bool isRefreshing;
 
     private void OnEnable()
     {
@@ -20,14 +19,14 @@ public class LobbiesList : MonoBehaviour
     public async void RefreshList()
     {
         if (isRefreshing) { return; }
+
         isRefreshing = true;
 
         try
         {
             QueryLobbiesOptions options = new QueryLobbiesOptions();
-            options.Count = 25; // could break down lobbies into pages (pagening)
+            options.Count = 25;
 
-            // Don't show full or locked lobbies
             options.Filters = new List<QueryFilter>()
             {
                 new QueryFilter(
@@ -42,7 +41,7 @@ public class LobbiesList : MonoBehaviour
 
             QueryResponse lobbies = await Lobbies.Instance.QueryLobbiesAsync(options);
 
-            foreach(Transform child in lobbyItemParent)
+            foreach (Transform child in lobbyItemParent)
             {
                 Destroy(child.gameObject);
             }
@@ -57,11 +56,13 @@ public class LobbiesList : MonoBehaviour
         {
             Debug.Log(e);
         }
-        
+
         isRefreshing = false;
     }
+
     public void JoinAsync(Lobby lobby)
     {
         mainMenu.JoinAsync(lobby);
     }
 }
+

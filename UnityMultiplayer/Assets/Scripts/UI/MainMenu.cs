@@ -10,8 +10,6 @@ using UnityEngine.UI;
 public class MainMenu : MonoBehaviour
 {
     // prevents dedicated server support (for server billing reasons)
-    [SerializeField] private bool disableMatchmaking = false;
-
     [SerializeField] private TMP_Text queueStatusText;
     [SerializeField] private TMP_Text queueTimerText;
     [SerializeField] private TMP_Text findMatchButtonText;
@@ -32,8 +30,6 @@ public class MainMenu : MonoBehaviour
 
         queueStatusText.text = string.Empty;
         queueTimerText.text = string.Empty;
-
-        if (disableMatchmaking) { findMatchButtonText.text = "(Disabled)"; }
     }
 
     private void Update()
@@ -48,7 +44,7 @@ public class MainMenu : MonoBehaviour
 
     public async void FindMatchPressed()
     {
-        if (isCancelling || disableMatchmaking) { return; }
+        if (isCancelling) { return; }
 
         if (isMatchmaking)
         {
@@ -138,4 +134,5 @@ public class MainMenu : MonoBehaviour
 
         isBusy = false;
     }
+
 }

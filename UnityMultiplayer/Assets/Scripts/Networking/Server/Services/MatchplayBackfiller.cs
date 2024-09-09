@@ -56,8 +56,6 @@ public class MatchplayBackfiller : IDisposable
         BackfillLoop();
     }
 
-
-
     public int RemovePlayerFromMatch(string userId)
     {
         Player playerToRemove = GetPlayerById(userId);
@@ -82,7 +80,7 @@ public class MatchplayBackfiller : IDisposable
     public Team GetTeamByUserId(string userId)
     {
         return MatchProperties.Teams.FirstOrDefault(
-                t => t.PlayerIds.Contains(userId));
+            t => t.PlayerIds.Contains(userId));
     }
 
     private Player GetPlayerById(string userId)

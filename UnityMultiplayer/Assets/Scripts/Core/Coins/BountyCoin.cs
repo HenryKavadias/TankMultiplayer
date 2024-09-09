@@ -12,9 +12,9 @@ public class BountyCoin : Coin
             return 0;
         }
 
-        if (isCollected) { return 0; }
+        if (alreadyCollected) { return 0; }
 
-        isCollected = true;
+        alreadyCollected = true;
 
         Destroy(gameObject);
 

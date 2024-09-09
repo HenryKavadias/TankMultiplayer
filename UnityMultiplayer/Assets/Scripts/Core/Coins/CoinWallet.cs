@@ -11,8 +11,8 @@ public class CoinWallet : NetworkBehaviour
     [SerializeField] private BountyCoin coinPrefab;
 
     [Header("Settings")]
-    [SerializeField] private float coinSpread = 3;
-    [SerializeField] private float bountyPercentage = 50;
+    [SerializeField] private float coinSpread = 3f;
+    [SerializeField] private float bountyPercentage = 50f;
     [SerializeField] private int bountyCoinCount = 10;
     [SerializeField] private int minBountyCoinValue = 5;
     [SerializeField] private LayerMask layerMask;
@@ -20,7 +20,7 @@ public class CoinWallet : NetworkBehaviour
     private Collider2D[] coinBuffer = new Collider2D[1];
     private float coinRadius;
 
-    public NetworkVariable<int> totalCoins = new NetworkVariable<int>();
+    public NetworkVariable<int> TotalCoins = new NetworkVariable<int>();
 
     public override void OnNetworkSpawn()
     {
@@ -40,7 +40,7 @@ public class CoinWallet : NetworkBehaviour
 
     public void SpendCoins(int costToFire)
     {
-        totalCoins.Value -= costToFire;
+        TotalCoins.Value -= costToFire;
     }
 
     private void OnTriggerEnter2D(Collider2D col)
@@ -51,12 +51,12 @@ public class CoinWallet : NetworkBehaviour
 
         if (!IsServer) { return; }
 
-        totalCoins.Value += coinValue;
+        TotalCoins.Value += coinValue;
     }
 
     private void HandleDie(Health health)
     {
-        int bountyValue = (int)(totalCoins.Value * (bountyPercentage / 100f));
+        int bountyValue = (int)(TotalCoins.Value * (bountyPercentage / 100f));
         int bountyCoinValue = bountyValue / bountyCoinCount;
 
         if (bountyCoinValue < minBountyCoinValue) { return; }
@@ -73,11 +73,8 @@ public class CoinWallet : NetworkBehaviour
     {
         while (true)
         {
-            Vector2 spawnPoint = 
-                (Vector2)transform.position + 
-                UnityEngine.Random.insideUnitCircle * coinSpread;
-            int numColliders = Physics2D.OverlapCircleNonAlloc(
-                spawnPoint, coinRadius, coinBuffer, layerMask);
+            Vector2 spawnPoint = (Vector2)transform.position + UnityEngine.Random.insideUnitCircle * coinSpread;
+            int numColliders = Physics2D.OverlapCircleNonAlloc(spawnPoint, coinRadius, coinBuffer, layerMask);
             if (numColliders == 0)
             {
                 return spawnPoint;
@@ -85,3 +82,4 @@ public class CoinWallet : NetworkBehaviour
         }
     }
 }
+

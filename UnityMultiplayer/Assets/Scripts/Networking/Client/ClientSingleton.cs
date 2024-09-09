@@ -5,9 +5,10 @@ using UnityEngine;
 
 public class ClientSingleton : MonoBehaviour
 {
+    private static ClientSingleton instance;
+
     public ClientGameManager GameManager { get; private set; }
 
-    private static ClientSingleton instance;
     public static ClientSingleton Instance
     {
         get
@@ -15,14 +16,16 @@ public class ClientSingleton : MonoBehaviour
             if (instance != null) { return instance; }
 
             instance = FindObjectOfType<ClientSingleton>();
-            if (instance == null) 
+
+            if (instance == null)
             {
-                Debug.LogWarning("No ClientSingleton in the scene!");
-                return null; 
+                return null;
             }
+
             return instance;
         }
     }
+
     private void Start()
     {
         DontDestroyOnLoad(gameObject);
@@ -31,6 +34,7 @@ public class ClientSingleton : MonoBehaviour
     public async Task<bool> CreateClient()
     {
         GameManager = new ClientGameManager();
+
         return await GameManager.InitAsync();
     }
 
@@ -38,4 +42,5 @@ public class ClientSingleton : MonoBehaviour
     {
         GameManager?.Dispose();
     }
+
 }

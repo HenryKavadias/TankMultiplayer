@@ -15644,8 +15644,8 @@ MonoBehaviour:
   virtualCamera: {fileID: 200860641508013475}
   minimapIconRenderer: {fileID: 1733325139252470618}
   crosshair: {fileID: 2800000, guid: 0a07aa6c8e0036a4e986443af5afbbd3, type: 3}
-  <health>k__BackingField: {fileID: 1735664897323497352}
-  <wallet>k__BackingField: {fileID: 7689235654816367792}
+  <Health>k__BackingField: {fileID: 1735664897323497352}
+  <Wallet>k__BackingField: {fileID: 7689235654816367792}
   ownerPriority: 15
   ownerColour: {r: 0, g: 0.29307312, b: 0.6603774, a: 1}
   PlayerName:
@@ -15700,10 +15700,10 @@ MonoBehaviour:
   inputReader: {fileID: 11400000, guid: 9e4887bb2c07f3240b8074da69bb8212, type: 2}
   bodyTransform: {fileID: 552430884276796404}
   rb: {fileID: 3807412368745762791}
-  dustCloud: {fileID: 4634654183273985087}
-  moveSpeed: 5
+  dustTrail: {fileID: 4634654183273985087}
+  movementSpeed: 4
   turningRate: 270
-  particleEmmisionValue: 10
+  emissionRate: 10
 --- !u!114 &9110501697344745490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15778,7 +15778,7 @@ MonoBehaviour:
   layerMask:
     serializedVersion: 2
     m_Bits: 1
-  totalCoins:
+  TotalCoins:
     m_InternalValue: 0
 --- !u!1 &9070700131625196444
 GameObject:

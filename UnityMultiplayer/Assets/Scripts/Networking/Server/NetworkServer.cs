@@ -27,7 +27,7 @@ public class NetworkServer : IDisposable
         networkManager.ConnectionApprovalCallback += ApprovalCheck;
         networkManager.OnServerStarted += OnNetworkReady;
     }
-    // Server side
+
     public bool OpenConnection(string ip, int port)
     {
         UnityTransport transport = networkManager.gameObject.GetComponent<UnityTransport>();
@@ -39,16 +39,13 @@ public class NetworkServer : IDisposable
         NetworkManager.ConnectionApprovalRequest request,
         NetworkManager.ConnectionApprovalResponse response)
     {
-        // Get byte array and convert to JSON string
         string payload = System.Text.Encoding.UTF8.GetString(request.Payload);
-        // Take JSON string and convert to user data
         UserData userData = JsonUtility.FromJson<UserData>(payload);
 
         clientIdToAuth[request.ClientNetworkId] = userData.userAuthId;
         authIdToUserData[userData.userAuthId] = userData;
         OnUserJoined?.Invoke(userData);
 
-        // Can prevent players from joining if their names don't me conditions
         _ = SpawnPlayerDelayed(request.ClientNetworkId);
 
         response.Approved = true;
@@ -109,4 +106,5 @@ public class NetworkServer : IDisposable
             networkManager.Shutdown();
         }
     }
+
 }

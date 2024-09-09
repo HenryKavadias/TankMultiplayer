@@ -22,7 +22,8 @@ public class ClientGameManager : IDisposable
 
     public UserData UserData { get; private set; }
 
-    private const string MENUSCENENAME = "Menu";
+    private const string MenuSceneName = "Menu";
+
     public async Task<bool> InitAsync()
     {
         await UnityServices.InitializeAsync();
@@ -34,12 +35,11 @@ public class ClientGameManager : IDisposable
 
         if (authState == AuthState.Authenticated)
         {
-            UserData = new UserData()
+            UserData = new UserData
             {
                 userName = PlayerPrefs.GetString(NameSelector.PLAYERNAMEKEY, "Missing Name"),
                 userAuthId = AuthenticationService.Instance.PlayerId
             };
-
             return true;
         }
 
@@ -48,16 +48,16 @@ public class ClientGameManager : IDisposable
 
     public void GoToMenu()
     {
-        SceneManager.LoadScene(MENUSCENENAME);
+        SceneManager.LoadScene(MenuSceneName);
     }
-    // For dedicated server
+
     public void StartClient(string ip, int port)
     {
         UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
         transport.SetConnectionData(ip, (ushort)port);
         ConnectClient();
     }
-    // For relay
+
     public async Task StartClientAsync(string joinCode)
     {
         try
@@ -90,7 +90,10 @@ public class ClientGameManager : IDisposable
 
     public async void MatchmakeAsync(bool isTeamQueue, Action<MatchmakerPollingResult> onMatchmakeResponse)
     {
-        if (matchmaker.IsMatchmaking) { return; }
+        if (matchmaker.IsMatchmaking)
+        {
+            return;
+        }
 
         UserData.userGamePreferences.gameQueue = isTeamQueue ? GameQueue.Team : GameQueue.Solo;
         MatchmakerPollingResult matchResult = await GetMatchAsync();
@@ -123,4 +126,5 @@ public class ClientGameManager : IDisposable
     {
         networkClient?.Dispose();
     }
+
 }

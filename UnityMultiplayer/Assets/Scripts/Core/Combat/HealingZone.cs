@@ -8,6 +8,7 @@ public class HealingZone : NetworkBehaviour
 {
     [Header("References")]
     [SerializeField] private Image healPowerBar;
+
     [Header("Settings")]
     [SerializeField] private int maxHealPower = 30;
     [SerializeField] private float healCooldown = 60f;
@@ -17,10 +18,9 @@ public class HealingZone : NetworkBehaviour
 
     private float remainingCooldown;
     private float tickTimer;
+    private List<TankPlayer> playersInZone = new List<TankPlayer>();
 
     private NetworkVariable<int> HealPower = new NetworkVariable<int>();
-
-    private List<TankPlayer> playersInZone = new List<TankPlayer>();
 
     public override void OnNetworkSpawn()
     {
@@ -30,11 +30,12 @@ public class HealingZone : NetworkBehaviour
             HandleHealPowerChanged(0, HealPower.Value);
         }
 
-        if (IsServer) 
+        if (IsServer)
         {
             HealPower.Value = maxHealPower;
         }
     }
+
     public override void OnNetworkDespawn()
     {
         if (IsClient)
@@ -45,7 +46,7 @@ public class HealingZone : NetworkBehaviour
 
     private void OnTriggerEnter2D(Collider2D col)
     {
-        if (!IsServer) {  return; }
+        if (!IsServer) { return; }
 
         if (!col.attachedRigidbody.TryGetComponent<TankPlayer>(out TankPlayer player)) { return; }
 
@@ -86,12 +87,12 @@ public class HealingZone : NetworkBehaviour
             {
                 if (HealPower.Value == 0) { break; }
 
-                if (player.health.CurrentHealth.Value == player.health.MaxHealth) { continue; }
+                if (player.Health.CurrentHealth.Value == player.Health.MaxHealth) { continue; }
 
-                if (player.wallet.totalCoins.Value < coinsPerTick) { continue; }
+                if (player.Wallet.TotalCoins.Value < coinsPerTick) { continue; }
 
-                player.wallet.SpendCoins(coinsPerTick);
-                player.health.RestoreHealth(healthPerTick);
+                player.Wallet.SpendCoins(coinsPerTick);
+                player.Health.RestoreHealth(healthPerTick);
 
                 HealPower.Value -= 1;
 
@@ -103,11 +104,11 @@ public class HealingZone : NetworkBehaviour
 
             tickTimer = tickTimer % (1 / healTickRate);
         }
-
     }
 
     private void HandleHealPowerChanged(int oldHealPower, int newHealPower)
     {
-        healPowerBar.fillAmount = (float)newHealPower/ maxHealPower;
+        healPowerBar.fillAmount = (float)newHealPower / maxHealPower;
     }
+
 }

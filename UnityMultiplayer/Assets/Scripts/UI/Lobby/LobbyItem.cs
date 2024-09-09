@@ -26,3 +26,4 @@ public class LobbyItem : MonoBehaviour
         lobbiesList.JoinAsync(lobby);
     }
 }
+
