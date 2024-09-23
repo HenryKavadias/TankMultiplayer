@@ -57,7 +57,7 @@ public class HostGameManager : IDisposable
 
         UnityTransport transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
 
-        RelayServerData relayServerData = new RelayServerData(allocation, "dtls");
+        RelayServerData relayServerData = new RelayServerData(allocation, "udp");
         transport.SetRelayServerData(relayServerData);
 
         try
